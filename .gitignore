@@ -1,0 +1,88 @@
+############################################
+# Secrets / env
+############################################
+.env
+.env.*
+!.env.example
+
+# Backend env files
+backend/.env
+backend/.env.*
+!backend/.env.example
+
+############################################
+# Python / Django
+############################################
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+backend/.venv/
+
+# Django local artifacts
+*.sqlite3
+db.sqlite3
+backend/db.sqlite3
+
+# Django collected static / uploads
+backend/staticfiles/
+backend/media/
+
+# Python tooling caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.cache/
+coverage/
+.coverage
+htmlcov/
+
+############################################
+# Node / Vite / frontend
+############################################
+node_modules/
+frontend/node_modules/
+
+# Build output
+dist/
+frontend/dist/
+
+# Vite cache
+frontend/.vite/
+
+# TypeScript incremental build info
+*.tsbuildinfo
+
+# Lint caches
+frontend/.eslintcache
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Package manager caches
+.npm/
+.pnpm-store/
+
+############################################
+# IDEs / OS
+############################################
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+Desktop.ini

@@ -5,6 +5,7 @@ from trip.services.polyline import haversine_miles
 
 ORS_DIRECTIONS = "https://api.openrouteservice.org/v2/directions/driving-car"
 
+
 def _to_lonlat(latlng):
     lat, lng = latlng
     return [lng, lat]
@@ -23,7 +24,7 @@ def _interpolate(a, b, points: int):
 
 
 def _fallback_route(start, pickup, end):
-    # Straight-line approximation with a bit of interpolation to look good on the map.
+    # Straight-line approximation so the app still works even if ORS fails.
     leg1 = haversine_miles(start, pickup)
     leg2 = haversine_miles(pickup, end)
     distance_miles = float(leg1 + leg2)
@@ -41,6 +42,7 @@ def _fallback_route(start, pickup, end):
         "polyline": polyline_latlng,
         "steps": [],
     }
+
 
 def ors_route(start, pickup, end):
     api_key = os.getenv("ORS_API_KEY", "")
@@ -60,29 +62,33 @@ def ors_route(start, pickup, end):
     headers = {
         "Authorization": api_key,
         "Content-Type": "application/json",
+        "Accept": "application/json",
     }
 
     timeout_s = float(os.getenv("ORS_TIMEOUT_SECONDS", "12"))
+
     try:
         r = requests.post(ORS_DIRECTIONS, json=body, headers=headers, timeout=timeout_s)
         if r.status_code >= 400:
             return _fallback_route(start, pickup, end)
+
         data = r.json()
     except Exception:
         return _fallback_route(start, pickup, end)
+
+    if "features" not in data or not data["features"]:
+        return _fallback_route(start, pickup, end)
+
     feature = data["features"][0]
-    props = feature["properties"]
-    summary = props["summary"]
+    props = feature.get("properties", {})
+    summary = props.get("summary", {})
 
-    # ORS gives distance in miles because units=mi, duration in seconds
-    distance_miles = float(summary["distance"])
-    duration_minutes = float(summary["duration"]) / 60.0
+    distance_miles = float(summary.get("distance", 0.0))
+    duration_minutes = float(summary.get("duration", 0.0)) / 60.0
 
-    # Geometry is GeoJSON line string: [lon,lat] list
-    coords_ll = feature["geometry"]["coordinates"]
-    polyline_latlng = [[c[1], c[0]] for c in coords_ll]
+    coords_ll = feature.get("geometry", {}).get("coordinates", [])
+    polyline_latlng = [[c[1], c[0]] for c in coords_ll] if coords_ll else []
 
-    # Keep only essential instruction list
     segments = props.get("segments", [])
     steps_out = []
     for seg in segments:
@@ -99,16 +105,4 @@ def ors_route(start, pickup, end):
         "durationMinutes": duration_minutes,
         "polyline": polyline_latlng,
         "steps": steps_out,
-    }
-"""Routing service utilities (placeholder)."""
-
-
-def calculate_route(origin, destination):
-    """Return a route between origin and destination (placeholder)."""
-    return {
-        "distance_km": 1.0,
-        "duration_min": 1,
-        "steps": [
-            {"from": origin, "to": destination, "mode": "drive"}
-        ],
     }

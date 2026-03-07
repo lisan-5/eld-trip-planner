@@ -2,6 +2,9 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 
+from django.http import HttpResponse
+from trip.services.pdf_logs import build_logs_pdf
+
 from .serializers import PlanTripRequestSerializer
 from trip.services.geocode import geocode_place
 from trip.services.routing import ors_route
@@ -71,3 +74,13 @@ def plan_trip(request):
             {"error": f"Trip planning failed: {str(e)}"},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
+
+
+@api_view(["POST"])
+def logs_pdf(request):
+    payload = request.data
+    pdf_bytes = build_logs_pdf(payload)
+
+    response = HttpResponse(pdf_bytes, content_type="application/pdf")
+    response["Content-Disposition"] = 'attachment; filename="eld-logs.pdf"'
+    return response

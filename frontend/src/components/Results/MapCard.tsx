@@ -211,9 +211,14 @@ export function MapCard({
       const prev = polyline[index - 1];
       const point = polyline[index];
       if (!prev || !point) continue;
+      // Prefer using the forward tangent (point -> next) so the arrow
+      // indicates the travel direction at this point. Fall back to
+      // prev->point if next is not available.
+      const next = polyline[index + 1] ?? null;
+      const angle = next ? bearingDegrees(point, next) : bearingDegrees(prev, point);
       arrows.push({
         position: point,
-        angle: bearingDegrees(prev, point),
+        angle,
       });
     }
 

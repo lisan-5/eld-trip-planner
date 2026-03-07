@@ -55,6 +55,29 @@ function eventIcon(e: TimelineEvent) {
   }
 }
 
+function eventTone(event: TimelineEvent) {
+  switch (String(event.type || "").toUpperCase()) {
+    case "START":
+      return { main: "success.main", soft: "success.light" };
+    case "PICKUP":
+      return { main: "info.main", soft: "info.light" };
+    case "DROPOFF":
+      return { main: "error.main", soft: "error.light" };
+    case "FUEL":
+      return { main: "secondary.main", soft: "secondary.light" };
+    case "BREAK":
+      return { main: "warning.main", soft: "warning.light" };
+    case "SLEEP":
+      return { main: "grey.500", soft: "grey.300" };
+    default:
+      return { main: "primary.main", soft: "primary.light" };
+  }
+}
+
+function eventTypeLabel(event: TimelineEvent) {
+  return String(event.type || event.status).replace("_", " ");
+}
+
 export function TimelineCard({
   events,
   meta,
@@ -95,6 +118,27 @@ export function TimelineCard({
           Stop list generated with HOS constraints and required breaks.
         </Typography>
 
+        <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+          <Chip
+            size="small"
+            variant="outlined"
+            label={`${events.length} events`}
+          />
+          <Chip
+            size="small"
+            variant="outlined"
+            label={`${events.filter((e) => e.status === "D").length} driving legs`}
+          />
+          {meta && (
+            <Chip
+              size="small"
+              color={meta.cycleRemainingHours < 8 ? "warning" : "default"}
+              variant="outlined"
+              label={`${meta.cycleUsedHours.toFixed(1)}h used this cycle`}
+            />
+          )}
+        </Stack>
+
         <Divider />
 
         {events.length === 0 ? (
@@ -121,6 +165,7 @@ export function TimelineCard({
                 const en = dayjs(e.endISO);
                 const mins = Math.max(0, en.diff(s, "minute"));
                 const showLine = idx < events.length - 1;
+                const tone = eventTone(e);
 
                 return (
                   <Box key={e.id} sx={{ position: "relative", pl: 5 }}>
@@ -131,8 +176,8 @@ export function TimelineCard({
                         top: 22,
                         bottom: showLine ? -18 : "auto",
                         width: 2,
-                        bgcolor: "divider",
-                        opacity: 0.9,
+                        bgcolor: tone.main,
+                        opacity: 0.35,
                       }}
                     />
                     <Box
@@ -145,10 +190,11 @@ export function TimelineCard({
                         borderRadius: 999,
                         display: "grid",
                         placeItems: "center",
-                        bgcolor: "background.paper",
+                        bgcolor: (t) => alpha(t.palette.background.paper, 0.95),
                         border: "1px solid",
-                        borderColor: "divider",
-                        color: "text.primary",
+                        borderColor: tone.main,
+                        color: tone.main,
+                        boxShadow: 2,
                       }}
                     >
                       {eventIcon(e)}
@@ -159,12 +205,15 @@ export function TimelineCard({
                         p: 1.25,
                         borderRadius: 1,
                         border: "1px solid",
-                        borderColor: "divider",
+                        borderColor: (t) => alpha(t.palette.text.primary, 0.08),
+                        borderLeft: "4px solid",
+                        borderLeftColor: tone.main,
                         bgcolor: (t) =>
                           alpha(
                             t.palette.background.paper,
                             t.palette.mode === "dark" ? 0.35 : 0.6,
                           ),
+                        boxShadow: 1,
                         "&:hover": {
                           bgcolor: (t) =>
                             alpha(
@@ -189,6 +238,19 @@ export function TimelineCard({
                         <Stack direction="row" spacing={1} alignItems="center">
                           <Chip
                             size="small"
+                            label={eventTypeLabel(e)}
+                            sx={{
+                              bgcolor: (t) =>
+                                alpha(
+                                  (t.palette as any)[tone.main.split(".")[0]]
+                                    ?.main ?? t.palette.primary.main,
+                                  t.palette.mode === "dark" ? 0.18 : 0.12,
+                                ),
+                              color: tone.main,
+                            }}
+                          />
+                          <Chip
+                            size="small"
                             variant="outlined"
                             label={fmtDuration(mins)}
                           />
@@ -205,12 +267,34 @@ export function TimelineCard({
                         color="text.secondary"
                         sx={{ mt: 0.5 }}
                       >
-                        {s.format("MMM D, HH:mm")} → {en.format("HH:mm")}
+                        Window: {s.format("MMM D, HH:mm")} →{" "}
+                        {en.format("HH:mm")}
                       </Typography>
 
                       <Typography variant="body2" color="text.secondary">
                         {e.locationLabel}
                       </Typography>
+
+                      <Stack
+                        direction="row"
+                        spacing={1}
+                        flexWrap="wrap"
+                        useFlexGap
+                        sx={{ mt: 1 }}
+                      >
+                        {typeof e.distanceMilesSoFar === "number" && (
+                          <Chip
+                            size="small"
+                            variant="outlined"
+                            label={`${e.distanceMilesSoFar.toFixed(0)} mi so far`}
+                          />
+                        )}
+                        <Chip
+                          size="small"
+                          variant="outlined"
+                          label={`Status: ${statusLabel[e.status] ?? e.status}`}
+                        />
+                      </Stack>
                     </Box>
                   </Box>
                 );

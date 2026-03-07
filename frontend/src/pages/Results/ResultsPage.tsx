@@ -23,6 +23,7 @@ import type { PlanTripResponse } from "../../types/trip";
 import { MapCard } from "../../components/Results/MapCard";
 import { TimelineCard } from "../../components/Results/TimelineCard";
 import { LogsViewer } from "../../components/Results/LogsViewer";
+import { ComplianceCard } from "../../components/Results/ComplianceCard";
 
 function LoadingOverlay({ show }: { show: boolean }) {
   if (!show) return null;
@@ -159,7 +160,7 @@ export function ResultsPage() {
           zIndex: 20,
           border: "1px solid",
           borderColor: "divider",
-          borderRadius: 1,
+          borderRadius: 2,
           bgcolor: (t) =>
             alpha(
               t.palette.background.paper,
@@ -167,6 +168,8 @@ export function ResultsPage() {
             ),
           backdropFilter: "blur(12px)",
           p: 2,
+          backgroundImage: (t) =>
+            `linear-gradient(140deg, ${alpha(t.palette.primary.main, t.palette.mode === "dark" ? 0.18 : 0.1)} 0%, transparent 42%)`,
         }}
       >
         <Stack
@@ -245,6 +248,8 @@ export function ResultsPage() {
       </Box>
 
       {error && <Alert severity="error">{error}</Alert>}
+
+      {data && <ComplianceCard data={data} />}
 
       <Stack spacing={2}>
         {/* 1) Map */}

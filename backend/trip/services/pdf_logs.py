@@ -6,6 +6,13 @@ from reportlab.lib import colors
 
 STATUS_ROW = {"OFF": 0, "SB": 1, "D": 2, "ON": 3}
 
+STATUS_COLOR = {
+    "OFF": colors.HexColor("#64748B"),
+    "SB": colors.HexColor("#7C3AED"),
+    "D": colors.HexColor("#EA580C"),
+    "ON": colors.HexColor("#0F766E"),
+}
+
 
 def _fmt_mins(m: int) -> str:
     h = m // 60
@@ -14,6 +21,9 @@ def _fmt_mins(m: int) -> str:
 
 
 def _draw_grid(c: canvas.Canvas, x: float, y: float, w: float, h: float):
+    c.setFillColor(colors.Color(0.956, 0.968, 0.988, alpha=1))
+    c.roundRect(x, y, w, h, 10, stroke=0, fill=1)
+
     # Outer
     c.setStrokeColor(colors.Color(0.15, 0.18, 0.25, alpha=0.30))
     c.setLineWidth(1)
@@ -60,6 +70,20 @@ def _y_for_status(status: str, y: float, h: float) -> float:
     return y + (3 - row) * row_h + row_h * 0.55  # invert so OFF is top row visually
 
 
+def _draw_metric_box(c: canvas.Canvas, x: float, y: float, w: float, h: float, label: str, value: str, color):
+    c.setFillColor(colors.Color(color.red, color.green, color.blue, alpha=0.10))
+    c.setStrokeColor(colors.Color(color.red, color.green, color.blue, alpha=0.30))
+    c.roundRect(x, y, w, h, 10, stroke=1, fill=1)
+
+    c.setFillColor(color)
+    c.setFont("Helvetica-Bold", 8)
+    c.drawString(x + 10, y + h - 14, label)
+
+    c.setFillColor(colors.Color(0.10, 0.12, 0.18, alpha=0.88))
+    c.setFont("Helvetica-Bold", 11)
+    c.drawString(x + 10, y + 10, value)
+
+
 def build_logs_pdf(payload: dict) -> bytes:
     """
     payload from frontend:
@@ -103,11 +127,24 @@ def build_logs_pdf(payload: dict) -> bytes:
             f"Cycle Used: {meta.get('cycleUsedHours', 0):.1f}h  |  Remaining: {meta.get('cycleRemainingHours', 0):.1f}h"
         )
 
+        # Header metric cards
+        metric_y = H - 1.6 * inch
+        metric_w = 1.15 * inch
+        metric_h = 0.52 * inch
+        metric_xs = [W - 4.45 * inch, W - 3.2 * inch, W - 1.95 * inch]
+        header_metrics = [
+            ("Miles", str(miles), colors.HexColor("#EA580C")),
+            ("On duty", _fmt_mins(int(totals.get("onDutyMins", 0) + totals.get("drivingMins", 0))), colors.HexColor("#0F766E")),
+            ("Driving", _fmt_mins(int(totals.get("drivingMins", 0))), colors.HexColor("#2563EB")),
+        ]
+        for idx, (label, value, color) in enumerate(header_metrics):
+            _draw_metric_box(c, metric_xs[idx], metric_y, metric_w, metric_h, label, value, color)
+
         # Labels left of grid
         labels_x = 0.7 * inch
         grid_x = 2.8 * inch
-        grid_y = 2.4 * inch
-        grid_w = W - grid_x - 2.0 * inch
+        grid_y = 2.75 * inch
+        grid_w = W - grid_x - 0.8 * inch
         grid_h = 2.2 * inch
 
         c.setFont("Helvetica", 9)
@@ -122,48 +159,49 @@ def build_logs_pdf(payload: dict) -> bytes:
 
         # Duty lines
         segs = log.get("segments") or []
-        c.setStrokeColor(colors.Color(0.05, 0.08, 0.14, alpha=0.92))
         c.setLineWidth(3.5)
         for seg in segs:
             st = seg.get("status")
             x1 = _x_from_min(seg.get("startMinute", 0), grid_x, grid_w)
             x2 = _x_from_min(seg.get("endMinute", 0), grid_x, grid_w)
             yy = _y_for_status(st, grid_y, grid_h)
+            c.setStrokeColor(STATUS_COLOR.get(st, colors.Color(0.05, 0.08, 0.14, alpha=0.92)))
             c.line(x1, yy, x2, yy)
 
-        # Totals box
-        box_x = W - 1.85 * inch
-        box_y = grid_y
-        box_w = 1.15 * inch
-        box_h = grid_h
-
-        c.setStrokeColor(colors.Color(0.15, 0.18, 0.25, alpha=0.30))
-        c.setFillColor(colors.white)
-        c.roundRect(box_x, box_y, box_w, box_h, 10, stroke=1, fill=1)
-
-        c.setFillColor(colors.Color(0.10, 0.12, 0.18, alpha=0.85))
-        c.setFont("Helvetica-Bold", 9)
-        c.drawString(box_x + 10, box_y + box_h + 6, "Total Hours")
-
-        c.setFont("Helvetica", 9)
-        lines = [
+        # Totals below grid
+        totals_y = grid_y - 0.55 * inch
+        totals_w = 1.15 * inch
+        totals_h = 0.48 * inch
+        totals_gap = 0.12 * inch
+        totals_x = grid_x
+        total_rows = [
             ("OFF", totals.get("offDutyMins", 0)),
             ("SB", totals.get("sleeperMins", 0)),
-            ("D", totals.get("drivingMins", 0)),
+            ("DR", totals.get("drivingMins", 0)),
             ("ON", totals.get("onDutyMins", 0)),
         ]
-        for idx, (lbl, mins) in enumerate(lines):
-            yy = box_y + box_h - (idx + 1) * (box_h / 5.0)
-            c.drawString(box_x + 10, yy, f"{lbl}: {_fmt_mins(int(mins))}")
+        for idx, (lbl, mins) in enumerate(total_rows):
+            color_key = "D" if lbl == "DR" else lbl
+            _draw_metric_box(
+                c,
+                totals_x + idx * (totals_w + totals_gap),
+                totals_y,
+                totals_w,
+                totals_h,
+                lbl,
+                _fmt_mins(int(mins)),
+                STATUS_COLOR[color_key],
+            )
 
         # Remarks
-        remarks_y = 0.9 * inch
+        remarks_y = 0.75 * inch
         c.setFont("Helvetica-Bold", 10)
         c.setFillColor(colors.Color(0.10, 0.12, 0.18, alpha=0.85))
         c.drawString(0.7 * inch, remarks_y + 0.9 * inch, "Remarks (location at each status change)")
 
         c.setStrokeColor(colors.Color(0.15, 0.18, 0.25, alpha=0.25))
-        c.roundRect(0.7 * inch, remarks_y, W - 1.4 * inch, 0.8 * inch, 10, stroke=1, fill=0)
+        c.setFillColor(colors.Color(0.99, 0.992, 1, alpha=1))
+        c.roundRect(0.7 * inch, remarks_y, W - 1.4 * inch, 0.8 * inch, 10, stroke=1, fill=1)
 
         c.setFont("Helvetica", 9)
         c.setFillColor(colors.Color(0.10, 0.12, 0.18, alpha=0.75))

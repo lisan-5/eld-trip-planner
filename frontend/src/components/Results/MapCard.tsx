@@ -128,7 +128,7 @@ function routeDirectionIcon(angle: number, theme: Theme) {
             height: 0;
             border-top: 7px solid transparent;
             border-bottom: 7px solid transparent;
-            border-left: 12px solid ${theme.palette.primary.dark};
+            border-left: 12px solid ${theme.palette.primary.main};
             filter: drop-shadow(0 2px 6px rgba(15, 23, 42, 0.22));
             opacity: 0.98;
           "

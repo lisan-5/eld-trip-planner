@@ -49,9 +49,11 @@ export function AppShell() {
             py: 3,
             position: { xs: "relative", md: "sticky" },
             top: 0,
-            alignSelf: { md: "start" },
             height: { md: "100vh" },
-            overflow: { md: "auto" },
+            display: { md: "flex" },
+            flexDirection: { md: "column" },
+            justifyContent: { md: "flex-start" },
+            overflow: "visible",
             background: (theme) =>
               theme.palette.mode === "dark"
                 ? `linear-gradient(180deg, ${alpha(theme.palette.primary.main, 0.22)} 0%, ${alpha("#160d07", 0.92)} 18%, ${alpha(theme.palette.background.paper, 0.88)} 100%)`

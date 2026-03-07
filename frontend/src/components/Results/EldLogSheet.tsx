@@ -78,13 +78,7 @@ export function EldLogSheet({ log }: { log: DailyLog }) {
   const gridTop = 74;
   const gridH = 200;
   const rowH = gridH / 4;
-  const headerFields = [
-    { label: "Truck #", value: "—" },
-    { label: "Trailer #", value: "—" },
-    { label: "Carrier", value: "—" },
-    { label: "Home terminal", value: "—" },
-    { label: "Load ref", value: "—" },
-  ];
+  
   const recapItems = [
     {
       label: "Off Duty",
@@ -264,52 +258,7 @@ export function EldLogSheet({ log }: { log: DailyLog }) {
             </Stack>
           </Stack>
 
-          <Stack
-            direction="row"
-            spacing={1}
-            useFlexGap
-            flexWrap="wrap"
-            sx={{ mt: 1.5 }}
-          >
-            {headerFields.map((field) => (
-              <Box
-                key={field.label}
-                sx={{
-                  minWidth: { xs: "calc(50% - 4px)", md: 132 },
-                  flex: field.label === "Load ref" ? { md: 1.2 } : 1,
-                  px: 1,
-                  py: 0.7,
-                  borderRadius: 1,
-                  border: "1px solid rgba(78, 59, 35, 0.12)",
-                  bgcolor: "rgba(255,252,247,0.78)",
-                }}
-              >
-                <Typography
-                  variant="caption"
-                  sx={{
-                    display: "block",
-                    fontSize: 10,
-                    color: "rgba(78, 59, 35, 0.68)",
-                    textTransform: "uppercase",
-                    letterSpacing: "0.08em",
-                  }}
-                >
-                  {field.label}
-                </Typography>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    minHeight: 20,
-                    fontSize: 12.5,
-                    fontWeight: 600,
-                    color: "rgba(38, 28, 18, 0.86)",
-                  }}
-                >
-                  {field.value}
-                </Typography>
-              </Box>
-            ))}
-          </Stack>
+          
         </Box>
 
         <Divider sx={{ borderColor: "rgba(78, 59, 35, 0.12)" }} />

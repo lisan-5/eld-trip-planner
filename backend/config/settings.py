@@ -66,6 +66,8 @@ DATABASES = {
 # Debug and other runtime settings from env
 DEBUG = os.getenv("DJANGO_DEBUG", "0") == "1"
 
+ALLOWED_HOSTS = ["*"]
+
 CORS_ALLOWED_ORIGINS = [
 	os.getenv("FRONTEND_ORIGIN", "http://localhost:5173"),
 ]

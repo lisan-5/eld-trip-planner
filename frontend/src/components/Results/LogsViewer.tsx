@@ -153,8 +153,8 @@ export function LogsViewer({
             sx={{
               borderBottom: "1px solid",
               borderColor: "divider",
-              mx: -2,
-              px: 2,
+              mx: { xs: 0, sm: -2 },
+              px: { xs: 0, sm: 2 },
               background: (theme) =>
                 theme.palette.mode === "dark"
                   ? alpha(theme.palette.common.white, 0.03)

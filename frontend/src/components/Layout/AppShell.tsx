@@ -1,7 +1,7 @@
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { Box, Button, IconButton, Tooltip, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
-import LocalShippingIcon from "@mui/icons-material/LocalShipping";
+// replaced LocalShippingIcon with brand image
 import RouteIcon from "@mui/icons-material/Route";
 import MapIcon from "@mui/icons-material/Map";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
@@ -25,11 +25,16 @@ export function AppShell() {
         minHeight: "100vh",
         position: "relative",
         isolation: "isolate",
+        width: "100%",
+        maxWidth: "100%",
+        overflowX: "clip",
       }}
     >
       <Box
         sx={{
           minHeight: "100vh",
+          width: "100%",
+          maxWidth: "100%",
           display: "grid",
           gridTemplateColumns: { xs: "1fr", md: "320px 1fr" },
         }}
@@ -83,24 +88,29 @@ export function AppShell() {
               mb: 2.5,
             }}
           >
-            <Box
-              className="brand-badge"
-              sx={{
-                width: 50,
-                height: 50,
-                borderRadius: 2.5,
-                display: "grid",
-                placeItems: "center",
-                background: (theme) =>
-                  `linear-gradient(145deg, ${theme.palette.primary.light} 0%, ${theme.palette.primary.main} 60%, ${theme.palette.primary.dark} 100%)`,
-                color: "primary.contrastText",
-                boxShadow: (theme) =>
-                  `0 18px 44px ${alpha(theme.palette.primary.main, 0.34)}`,
-                flex: "0 0 auto",
-              }}
-            >
-              <LocalShippingIcon className="brand-logo-icon" />
-            </Box>
+              <Box
+                className="brand-badge"
+                sx={{
+                  width: 50,
+                  height: 50,
+                  borderRadius: 2.5,
+                  display: "grid",
+                  placeItems: "center",
+                  background: (theme) =>
+                    `linear-gradient(145deg, ${theme.palette.primary.light} 0%, ${theme.palette.primary.main} 60%, ${theme.palette.primary.dark} 100%)`,
+                  color: "primary.contrastText",
+                  boxShadow: (theme) =>
+                    `0 18px 44px ${alpha(theme.palette.primary.main, 0.34)}`,
+                  flex: "0 0 auto",
+                }}
+              >
+                <Box
+                  component="img"
+                  src="/logo.png"
+                  alt="Spotter Atlas"
+                  sx={{ width: 34, height: 34, objectFit: "contain" }}
+                />
+              </Box>
             <Box sx={{ flex: 1, minWidth: 0 }}>
               <Typography
                 variant="subtitle1"
@@ -368,6 +378,7 @@ export function AppShell() {
                 `radial-gradient(circle, ${alpha(theme.palette.primary.main, theme.palette.mode === "dark" ? 0.2 : 0.18)} 0%, transparent 68%)`,
               filter: "blur(12px)",
               pointerEvents: "none",
+              display: { xs: "none", md: "block" },
             }}
           />
         </Box>

@@ -15,7 +15,7 @@ import Inventory2Icon from "@mui/icons-material/Inventory2";
 import FlagIcon from "@mui/icons-material/Flag";
 import PersonIcon from "@mui/icons-material/Person";
 import SettingsSuggestIcon from "@mui/icons-material/SettingsSuggest";
-import LocalShippingRoundedIcon from "@mui/icons-material/LocalShippingRounded";
+// replaced LocalShippingRoundedIcon with brand image
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
@@ -350,7 +350,13 @@ export function TripForm() {
               isSubmitting ? (
                 <CircularProgress size={16} color="inherit" />
               ) : (
-                <LocalShippingRoundedIcon className="cta-icon" />
+                <Box
+                  component="img"
+                  src="/logo.png"
+                  alt="logo"
+                  className="cta-icon"
+                  sx={{ width: 20, height: 20, objectFit: "contain" }}
+                />
               )
             }
             sx={{

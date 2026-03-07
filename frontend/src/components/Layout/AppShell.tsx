@@ -88,29 +88,29 @@ export function AppShell() {
               mb: 2.5,
             }}
           >
+            <Box
+              className="brand-badge"
+              sx={{
+                width: 54,
+                height: 54,
+                borderRadius: 2.5,
+                display: "grid",
+                placeItems: "center",
+                background: (theme) =>
+                  `linear-gradient(145deg, ${theme.palette.primary.light} 0%, ${theme.palette.primary.main} 60%, ${theme.palette.primary.dark} 100%)`,
+                color: "primary.contrastText",
+                boxShadow: (theme) =>
+                  `0 18px 44px ${alpha(theme.palette.primary.main, 0.34)}`,
+                flex: "0 0 auto",
+              }}
+            >
               <Box
-                className="brand-badge"
-                sx={{
-                  width: 50,
-                  height: 50,
-                  borderRadius: 2.5,
-                  display: "grid",
-                  placeItems: "center",
-                  background: (theme) =>
-                    `linear-gradient(145deg, ${theme.palette.primary.light} 0%, ${theme.palette.primary.main} 60%, ${theme.palette.primary.dark} 100%)`,
-                  color: "primary.contrastText",
-                  boxShadow: (theme) =>
-                    `0 18px 44px ${alpha(theme.palette.primary.main, 0.34)}`,
-                  flex: "0 0 auto",
-                }}
-              >
-                <Box
-                  component="img"
-                  src="/logo.png"
-                  alt="Spotter Atlas"
-                  sx={{ width: 34, height: 34, objectFit: "contain" }}
-                />
-              </Box>
+                component="img"
+                src="/logo.png"
+                alt="Spotter Atlas"
+                sx={{ width: 40, height: 40, objectFit: "contain" }}
+              />
+            </Box>
             <Box sx={{ flex: 1, minWidth: 0 }}>
               <Typography
                 variant="subtitle1"

@@ -107,36 +107,7 @@ function bearingDegrees(start: [number, number], end: [number, number]) {
   return (Math.atan2(latDiff, lngDiff) * 180) / Math.PI;
 }
 
-function routeDirectionIcon(angle: number, theme: Theme) {
-  return L.divIcon({
-    className: "",
-    iconSize: [24, 24],
-    iconAnchor: [12, 12],
-    html: `
-      <div
-        style="
-          width: 24px;
-          height: 24px;
-          display: grid;
-          place-items: center;
-          transform: rotate(${angle}deg);
-        "
-      >
-        <div
-          style="
-            width: 0;
-            height: 0;
-            border-top: 7px solid transparent;
-            border-bottom: 7px solid transparent;
-            border-left: 12px solid ${theme.palette.info.main};
-            filter: drop-shadow(0 2px 6px rgba(15, 23, 42, 0.22));
-            opacity: 0.98;
-          "
-        ></div>
-      </div>
-    `,
-  });
-}
+// Directional arrow icon removed — arrows disabled per user request.
 
 function MapBindings({
   polyline,
@@ -198,32 +169,8 @@ export function MapCard({
   const [map, setMap] = useState<L.Map | null>(null);
   const boundsRef = useRef<L.LatLngBounds | null>(null);
 
-  const routeArrows = useMemo(() => {
-    if (polyline.length < 2) return [];
-    const step = Math.max(6, Math.floor(polyline.length / 6));
-    const startIndex = Math.min(
-      polyline.length - 1,
-      Math.max(1, Math.floor(polyline.length / 12)),
-    );
-    const arrows: Array<{ position: [number, number]; angle: number }> = [];
-
-    for (let index = startIndex; index < polyline.length; index += step) {
-      const prev = polyline[index - 1];
-      const point = polyline[index];
-      if (!prev || !point) continue;
-      // Prefer using the forward tangent (point -> next) so the arrow
-      // indicates the travel direction at this point. Fall back to
-      // prev->point if next is not available.
-      const next = polyline[index + 1] ?? null;
-      const angle = next ? bearingDegrees(point, next) : bearingDegrees(prev, point);
-      arrows.push({
-        position: point,
-        angle,
-      });
-    }
-
-    return arrows;
-  }, [polyline]);
+  // Arrows are disabled — keep an empty array for compatibility.
+  const routeArrows: Array<{ position: [number, number]; angle: number }> = [];
 
   const legend = useMemo(
     () => [
@@ -302,14 +249,7 @@ export function MapCard({
                 </>
               )}
 
-              {routeArrows.map((arrow, index) => (
-                <Marker
-                  key={`route-arrow-${index}`}
-                  position={arrow.position}
-                  icon={routeDirectionIcon(arrow.angle, theme)}
-                  interactive={false}
-                />
-              ))}
+              {/* Route direction arrows intentionally removed */}
 
               <MapBindings
                 polyline={polyline}

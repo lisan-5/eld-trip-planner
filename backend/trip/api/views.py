@@ -1,6 +1,7 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
+from concurrent.futures import ThreadPoolExecutor
 
 from django.http import HttpResponse
 from trip.services.pdf_logs import build_logs_pdf
@@ -28,9 +29,11 @@ def plan_trip(request):
         pickup_q = data["pickupLocation"]
         dropoff_q = data["dropoffLocation"]
 
-        current = geocode_place(current_q)
-        pickup = geocode_place(pickup_q)
-        dropoff = geocode_place(dropoff_q)
+        # Geocode concurrently to reduce total wait time on slow providers.
+        with ThreadPoolExecutor(max_workers=3) as executor:
+            current, pickup, dropoff = list(
+                executor.map(geocode_place, [current_q, pickup_q, dropoff_q])
+            )
 
         if not current or not pickup or not dropoff:
             return Response(

@@ -78,7 +78,7 @@ export function EldLogSheet({ log }: { log: DailyLog }) {
   const gridTop = 74;
   const gridH = 200;
   const rowH = gridH / 4;
-  
+
   const recapItems = [
     {
       label: "Off Duty",
@@ -257,8 +257,6 @@ export function EldLogSheet({ log }: { log: DailyLog }) {
               ))}
             </Stack>
           </Stack>
-
-          
         </Box>
 
         <Divider sx={{ borderColor: "rgba(78, 59, 35, 0.12)" }} />

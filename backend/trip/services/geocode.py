@@ -65,7 +65,13 @@ def _geocode_cached(query: str):
     }
     # Be polite to Nominatim in case of multiple requests
     time.sleep(_nominatim_sleep_seconds())
-    r = requests.get(NOMINATIM_URL, params=params, headers=HEADERS, timeout=20)
+    timeout_s = float(os.getenv("NOMINATIM_TIMEOUT_SECONDS", "8"))
+    r = requests.get(
+        NOMINATIM_URL,
+        params=params,
+        headers=HEADERS,
+        timeout=timeout_s,
+    )
     r.raise_for_status()
     results = r.json()
     if not results:

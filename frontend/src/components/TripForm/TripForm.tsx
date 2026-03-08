@@ -21,6 +21,7 @@ import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { useTripStore } from "../../pages/TripPlanner/tripStore";
+import { planTripWithCache } from "../../api/trip";
 
 const schema = z.object({
   currentLocation: z.string().min(2, "Enter a valid current location"),
@@ -61,6 +62,8 @@ export function TripForm() {
 
   const onSubmit = (values: FormValues) => {
     setInputs(values);
+    // Start trip planning immediately so the results page can render sooner.
+    void planTripWithCache(values);
     navigate("/results");
   };
 

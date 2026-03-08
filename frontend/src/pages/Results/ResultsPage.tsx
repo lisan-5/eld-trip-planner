@@ -15,9 +15,10 @@ import { alpha } from "@mui/material/styles";
 import DownloadIcon from "@mui/icons-material/Download";
 import ReportProblemOutlinedIcon from "@mui/icons-material/ReportProblemOutlined";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import RefreshRoundedIcon from "@mui/icons-material/RefreshRounded";
 import { useNavigate } from "react-router-dom";
 import { useTripStore } from "../TripPlanner/tripStore";
-import { planTrip } from "../../api/trip";
+import { getCachedTripPlan, planTripWithCache } from "../../api/trip";
 import { downloadLogsPdf } from "../../api/pdf";
 import type { PlanTripResponse } from "../../types/trip";
 import { MapCard } from "../../components/Results/MapCard";
@@ -71,15 +72,25 @@ export function ResultsPage() {
     (async () => {
       try {
         if (!hasInputs) return;
+        const cached = getCachedTripPlan(inputs);
+        if (cached) {
+          setData(cached);
+        }
+
         setLoading(true);
         setError(null);
 
-        const res = await planTrip(inputs);
+        const res = await planTripWithCache(inputs);
         if (!alive) return;
         setData(res);
       } catch (e: any) {
         if (!alive) return;
-        setError(e?.message ?? "Failed to plan trip");
+        // Keep cached data on screen if available and show a softer error.
+        if (getCachedTripPlan(inputs)) {
+          setError("Could not refresh the latest trip data. Showing cached results.");
+        } else {
+          setError(e?.message ?? "Failed to plan trip");
+        }
       } finally {
         if (!alive) return;
         setLoading(false);
@@ -182,6 +193,19 @@ export function ResultsPage() {
             <Typography variant="body2" color="text.secondary">
               Dispatch console view of route, schedule, and logs.
             </Typography>
+            {loading && data && (
+              <Stack
+                direction="row"
+                spacing={0.75}
+                alignItems="center"
+                sx={{ mt: 0.6 }}
+              >
+                <RefreshRoundedIcon sx={{ fontSize: 14, color: "text.secondary" }} />
+                <Typography variant="caption" color="text.secondary">
+                  Refreshing route details in the background...
+                </Typography>
+              </Stack>
+            )}
           </Box>
 
           <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>

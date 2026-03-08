@@ -65,7 +65,7 @@ def ors_route(start, pickup, end):
         "Accept": "application/json",
     }
 
-    timeout_s = float(os.getenv("ORS_TIMEOUT_SECONDS", "12"))
+    timeout_s = float(os.getenv("ORS_TIMEOUT_SECONDS", "8"))
 
     try:
         r = requests.post(ORS_DIRECTIONS, json=body, headers=headers, timeout=timeout_s)
